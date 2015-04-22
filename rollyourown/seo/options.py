@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from django.db.models.options import get_verbose_name
+from django.utils.text import camel_case_to_spaces as get_verbose_name
 from django.db import models
 from django.utils.datastructures import SortedDict
 
