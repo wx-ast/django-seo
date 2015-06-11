@@ -2,7 +2,11 @@
 
 from django import forms
 from django.contrib import admin
-from django.contrib.contenttypes import generic
+try:
+    from django.contrib.contenttypes.forms import BaseGenericInlineFormSet
+    from django.contrib.contenttypes.admin import GenericStackedInline
+except ImportError:
+    from django.contrib.contenttypes.generic import BaseGenericInlineFormSet, GenericStackedInline
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_unicode
 from django.forms.models import fields_for_model
@@ -89,7 +93,7 @@ def _register_admin(admin_site, model, admin_class):
         pass
 
 
-class MetadataFormset(generic.BaseGenericInlineFormSet):
+class MetadataFormset(BaseGenericInlineFormSet):
     def _construct_form(self, i, **kwargs):
         """ Override the method to change the form attribute empty_permitted """
         form = super(MetadataFormset, self)._construct_form(i, **kwargs)
@@ -117,7 +121,7 @@ def get_inline(metadata_class):
         'ct_fk_field': "_object_id",
         'formset': MetadataFormset,
         }
-    return type('MetadataInline', (generic.GenericStackedInline,), attrs)
+    return type('MetadataInline', (GenericStackedInline,), attrs)
 
 
 def get_model_form(metadata_class):
