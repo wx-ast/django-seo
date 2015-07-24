@@ -129,7 +129,8 @@ class MetadataBackend(object):
                 ut_set.append('_site')
             if options.use_i18n:
                 ut_set.append('_language')
-            ut.append(tuple(ut_set))
+            if len(ut_set) > 1:
+                ut.append(tuple(ut_set))
         return tuple(ut)
 
     def get_manager(self, options):
