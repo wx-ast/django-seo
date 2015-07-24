@@ -19,6 +19,8 @@ RESERVED_FIELD_NAMES = ('_metadata', '_path', '_content_type', '_object_id',
                         '_content_object', '_view', '_site', 'objects', 
                         '_resolve_value', '_set_context', 'id', 'pk' )
 
+SEO_PATH_FIELD_MAX_LENGTH = getattr(settings, 'SEO_PATH_FIELD_MAX_LENGTH', 255)
+
 backend_registry = OrderedDict()
 
 class MetadataBaseModel(models.Model):
@@ -166,7 +168,7 @@ class PathBackend(MetadataBackend):
 
     def get_model(self, options):
         class PathMetadataBase(MetadataBaseModel):
-            _path = models.CharField(_('path'), max_length=255, unique=not (options.use_sites or options.use_i18n))
+            _path = models.CharField(_('path'), max_length=SEO_PATH_FIELD_MAX_LENGTH, unique=not (options.use_sites or options.use_i18n))
             if options.use_sites:
                 _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"))
             if options.use_i18n:
@@ -241,7 +243,7 @@ class ModelInstanceBackend(MetadataBackend):
 
     def get_model(self, options):
         class ModelInstanceMetadataBase(MetadataBaseModel):
-            _path = models.CharField(_('path'), max_length=255, editable=False, unique=not (options.use_sites or options.use_i18n))
+            _path = models.CharField(_('path'), max_length=SEO_PATH_FIELD_MAX_LENGTH, editable=False, unique=not (options.use_sites or options.use_i18n))
             _content_type = models.ForeignKey(ContentType, editable=False)
             _object_id = models.PositiveIntegerField(editable=False)
             _content_object = GenericForeignKey('_content_type', '_object_id')
