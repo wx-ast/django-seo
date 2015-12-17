@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+from collections import OrderedDict
 
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.db import models
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+try:
+    from django.contrib.contenttypes.fields import GenericForeignKey
+except ImportError:
+    from django.contrib.contenttypes.generic import GenericForeignKey
 from django.template import Template, Context
-from django.utils.datastructures import SortedDict
 
 from rollyourown.seo.utils import resolve_to_name, NotSet, Literal
 
@@ -16,7 +19,9 @@ RESERVED_FIELD_NAMES = ('_metadata', '_path', '_content_type', '_object_id',
                         '_content_object', '_view', '_site', 'objects', 
                         '_resolve_value', '_set_context', 'id', 'pk' )
 
-backend_registry = SortedDict()
+SEO_PATH_FIELD_MAX_LENGTH = getattr(settings, 'SEO_PATH_FIELD_MAX_LENGTH', 255)
+
+backend_registry = OrderedDict()
 
 class MetadataBaseModel(models.Model):
 
@@ -79,7 +84,7 @@ class BaseManager(models.Manager):
             site_id = settings.SITE_ID
         # Exclude entries for other sites
         where = ['_site_id IS NULL OR _site_id=%s']
-        return self.get_query_set().extra(where=where, params=[site_id])
+        return self.get_queryset().extra(where=where, params=[site_id])
 
     def for_site_and_language(self, site=None, language=None):
         queryset = self.on_current_site(site)
@@ -126,7 +131,8 @@ class MetadataBackend(object):
                 ut_set.append('_site')
             if options.use_i18n:
                 ut_set.append('_language')
-            ut.append(tuple(ut_set))
+            if len(ut_set) > 1:
+                ut.append(tuple(ut_set))
         return tuple(ut)
 
     def get_manager(self, options):
@@ -139,7 +145,7 @@ class MetadataBackend(object):
 
             if not options.use_sites:
                 def for_site_and_language(self, site=None, language=None):
-                    queryset = self.get_query_set()
+                    queryset = self.get_queryset()
                     if language:
                         queryset = queryset.filter(_language=language)
                     return queryset
@@ -162,7 +168,7 @@ class PathBackend(MetadataBackend):
 
     def get_model(self, options):
         class PathMetadataBase(MetadataBaseModel):
-            _path = models.CharField(_('path'), max_length=255, unique=not (options.use_sites or options.use_i18n))
+            _path = models.CharField(_('path'), max_length=SEO_PATH_FIELD_MAX_LENGTH, unique=not (options.use_sites or options.use_i18n))
             if options.use_sites:
                 _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"))
             if options.use_i18n:
@@ -237,10 +243,10 @@ class ModelInstanceBackend(MetadataBackend):
 
     def get_model(self, options):
         class ModelInstanceMetadataBase(MetadataBaseModel):
-            _path = models.CharField(_('path'), max_length=255, editable=False, unique=not (options.use_sites or options.use_i18n))
+            _path = models.CharField(_('path'), max_length=SEO_PATH_FIELD_MAX_LENGTH, editable=False, unique=not (options.use_sites or options.use_i18n))
             _content_type = models.ForeignKey(ContentType, editable=False)
             _object_id = models.PositiveIntegerField(editable=False)
-            _content_object = generic.GenericForeignKey('_content_type', '_object_id')
+            _content_object = GenericForeignKey('_content_type', '_object_id')
             if options.use_sites:
                 _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"))
             if options.use_i18n:

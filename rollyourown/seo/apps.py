@@ -4,6 +4,7 @@ from rollyourown.seo.models import setup
 
 class SeoConfig(AppConfig):
     name = 'rollyourown.seo'
+    verbose_name = 'DjangoSEO'
 
     def ready(self):
         setup()

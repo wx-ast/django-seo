@@ -5,10 +5,10 @@
 #    * Documentation
 #    * Make backends optional: Meta.backends = (path, modelinstance/model, view)
 import hashlib
+from collections import OrderedDict
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.datastructures import SortedDict
 from django.utils.functional import curry
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
@@ -23,7 +23,7 @@ from rollyourown.seo.fields import MetadataField, Tag, MetaTag, KeywordTag, Raw
 from rollyourown.seo.backends import backend_registry, RESERVED_FIELD_NAMES
 
 
-registry = SortedDict()
+registry = OrderedDict()
 
 
 class FormattedMetadata(object):
@@ -185,7 +185,7 @@ class MetadataBase(type):
                                         if isinstance(obj, MetadataField)]
         elements.sort(lambda x, y: cmp(x[1].creation_counter,
                                                 y[1].creation_counter))
-        elements = SortedDict(elements)
+        elements = OrderedDict(elements)
 
         # Validation:
         # TODO: Write a test framework for seo.Metadata validation
