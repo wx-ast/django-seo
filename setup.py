@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "DjangoSEO",
-    version = '1.0',
+    version = '1.0.1',
     packages = find_packages(exclude=["docs*", "regressiontests*"]),
     namespace_packages = ['rollyourown'],
     requires = ['django (>=1.1)'],
