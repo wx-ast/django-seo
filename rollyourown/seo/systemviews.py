@@ -5,7 +5,7 @@ def get_seo_views(metadata_class):
     return get_view_names(metadata_class._meta.seo_views)
 
     ## The following is a previous attempt to dynamically get all urls
-    ## This has a number of difficult spots, and is unnecessary when 
+    ## This has a number of difficult spots, and is unnecessary when
     ## seo_views is given
     #choices = SystemViews()
     #seo_views = get_view_names(metadata_class._meta.seo_views)
@@ -14,13 +14,13 @@ def get_seo_views(metadata_class):
     #else:
     #    return choices
 
-from django.db.models.loading import get_app
+from django.apps import apps
 
 def get_view_names(seo_views):
     output = []
     for name in seo_views:
         try:
-            app = get_app(name)
+            app = apps.get_app_config(name).models_module
         except:
             output.append(name)
         else:
