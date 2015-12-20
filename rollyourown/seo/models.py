@@ -20,6 +20,3 @@ def setup():
 
     from rollyourown.seo.base import register_signals
     register_signals()
-
-if django.VERSION[:2] < (1, 7):
-    setup()

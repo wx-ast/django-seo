@@ -78,7 +78,7 @@ class LazyChoices(LazyList):
 
     def __nonzero__(self):
         # Django tests for existence too early, meaning population is attempted
-        # before the models have been imported. 
+        # before the models have been imported.
         # This may have some side effects if truth testing is supposed to
         # evaluate the list, but in the case of django choices, this is not
         # The case. This prevents __len__ from being called on truth tests.
@@ -136,7 +136,7 @@ def _replace_quot(match):
 
 def escape_tags(value, valid_tags):
     """ Strips text from the given html string, leaving only tags.
-        This functionality requires BeautifulSoup, nothing will be 
+        This functionality requires BeautifulSoup, nothing will be
         done otherwise.
 
         This isn't perfect. Someone could put javascript in here:
@@ -159,7 +159,7 @@ def escape_tags(value, valid_tags):
 
     # Allow comments to be hidden
     value = value.replace("&lt;!--", "<!--").replace("--&gt;", "-->")
-    
+
     return mark_safe(value)
 
 
@@ -170,5 +170,6 @@ def _get_seo_content_types(seo_models):
     except: # previously caught DatabaseError
         # Return an empty list if this is called too early
         return []
+
 def get_seo_content_types(seo_models):
     return lazy(_get_seo_content_types, list)(seo_models)

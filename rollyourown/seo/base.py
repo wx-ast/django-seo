@@ -218,11 +218,6 @@ class MetadataBase(type):
         except KeyError:
             raise Exception('Metadata backend "%s" is not installed.' % backend_name)
 
-        #new_class._meta._add_backend(PathBackend)
-        #new_class._meta._add_backend(ModelInstanceBackend)
-        #new_class._meta._add_backend(ModelBackend)
-        #new_class._meta._add_backend(ViewBackend)
-
         registry[name] = new_class
 
         return new_class

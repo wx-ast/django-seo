@@ -41,5 +41,5 @@ def populate_all_metadata():
                 populate_metadata(model, InstanceMetadata)
 
 
-signals.post_syncdb.connect(_syncdb_handler, sender=seo_models,
+signals.post_migrate.connect(_syncdb_handler, sender=seo_models,
             dispatch_uid="rollyourown.seo.management.populate_metadata")

@@ -1,7 +1,7 @@
 VERSION = (1, 0, 0, 'beta', 1)
 __authors__ = ["Will Hardy <django-seo@willhardy.com.au>"]
 
-from rollyourown.seo.base import Metadata, Tag, KeywordTag, MetaTag, Raw, Literal, get_metadata, get_linked_metadata
+# from rollyourown.seo.base import Metadata, Tag, KeywordTag, MetaTag, Raw, Literal, get_metadata, get_linked_metadata
 
 def get_version():
     version = '%s.%s' % (VERSION[0], VERSION[1])
@@ -13,5 +13,3 @@ def get_version():
         version = '%s %s %s' % (version, VERSION[3], VERSION[4])
     return version
 __version__ = get_version()
-
-default_app_config = 'rollyourown.seo.apps.SeoConfig'
