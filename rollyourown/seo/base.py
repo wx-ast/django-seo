@@ -8,20 +8,16 @@ import hashlib
 from collections import OrderedDict
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import curry
-from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.core.cache import cache
 from django.utils.encoding import iri_to_uri
 
 from rollyourown.seo.utils import NotSet, Literal
 from rollyourown.seo.options import Options
-from rollyourown.seo.fields import MetadataField, Tag, MetaTag, KeywordTag, Raw
+from rollyourown.seo.fields import MetadataField
 from rollyourown.seo.backends import backend_registry, RESERVED_FIELD_NAMES
-
 
 registry = OrderedDict()
 
@@ -35,11 +31,12 @@ class FormattedMetadata(object):
         self.__metadata = metadata
         if metadata._meta.use_cache:
             if metadata._meta.use_sites and site:
-                hexpath = hashlib.md5(iri_to_uri(site.domain+path)).hexdigest()
+                hexpath = hashlib.md5(iri_to_uri(site.domain + path)).hexdigest()
             else:
                 hexpath = hashlib.md5(iri_to_uri(path)).hexdigest()
             if metadata._meta.use_i18n:
-                self.__cache_prefix = 'rollyourown.seo.%s.%s.%s' % (self.__metadata.__class__.__name__, hexpath, language)
+                self.__cache_prefix = 'rollyourown.seo.%s.%s.%s' % \
+                                      (self.__metadata.__class__.__name__, hexpath, language)
             else:
                 self.__cache_prefix = 'rollyourown.seo.%s.%s' % (self.__metadata.__class__.__name__, hexpath)
         else:
@@ -90,11 +87,13 @@ class FormattedMetadata(object):
         # Look for a group called "name"
         if name in self.__metadata._meta.groups:
             if value is not None:
-                if value is not None:
-                    value = mark_safe(value)
-
+                value = mark_safe(value)
                 return value or None
-            value = '\n'.join(unicode(BoundMetadataField(self.__metadata._meta.elements[f], self._resolve_value(f))) for f in self.__metadata._meta.groups[name]).strip()
+            value_list = []
+            for f in self.__metadata._meta.groups[name]:
+                v = unicode(BoundMetadataField(self.__metadata._meta.elements[f], self._resolve_value(f)))
+                value_list.append(v)
+            value = '\n'.join(value_list).strip()
 
             if value is not None:
                 value = mark_safe(value)
@@ -102,8 +101,7 @@ class FormattedMetadata(object):
         # Look for an element called "name"
         elif name in self.__metadata._meta.elements:
             if value is not None:
-                if value is not None:
-                    value = mark_safe(value)
+                value = mark_safe(value)
                 return BoundMetadataField(self.__metadata._meta.elements[name], value or None)
             value = self._resolve_value(name)
             if cache_key is not None:
@@ -132,7 +130,8 @@ class FormattedMetadata(object):
             value = None
 
         if value is None:
-            value = mark_safe(u'\n'.join(unicode(getattr(self, f)) for f,e in self.__metadata._meta.elements.items() if e.head))
+            value = u'\n'.join(unicode(getattr(self, f)) for f, e in self.__metadata._meta.elements.items() if e.head)
+            value = mark_safe(value)
             if self.__cache_prefix is not None:
                 cache.set(self.__cache_prefix, value or '')
 
@@ -182,15 +181,15 @@ class MetadataBase(type):
 
         # Collect and sort our elements
         elements = [(key, attrs.pop(key)) for key, obj in attrs.items()
-                                        if isinstance(obj, MetadataField)]
+                    if isinstance(obj, MetadataField)]
         elements.sort(lambda x, y: cmp(x[1].creation_counter,
-                                                y[1].creation_counter))
+                                       y[1].creation_counter))
         elements = OrderedDict(elements)
 
         # Validation:
         # TODO: Write a test framework for seo.Metadata validation
         # Check that no group names clash with element names
-        for key,members in options.groups.items():
+        for key, members in options.groups.items():
             assert key not in elements, "Group name '%s' clashes with field name" % key
             for member in members:
                 assert member in elements, "Group member '%s' is not a valid field" % member
@@ -198,7 +197,6 @@ class MetadataBase(type):
         # Check that the names of the elements are not going to clash with a model field
         for key in elements:
             assert key not in RESERVED_FIELD_NAMES, "Field name '%s' is not allowed" % key
-
 
         # Preprocessing complete, here is the new class
         new_class = type.__new__(cls, name, bases, attrs)
@@ -222,12 +220,10 @@ class MetadataBase(type):
 
         return new_class
 
-
     # TODO: Move this function out of the way (subclasses will want to define their own attributes)
     def _get_formatted_data(cls, path, context=None, site=None, language=None):
         """ Return an object to conveniently access the appropriate values. """
         return FormattedMetadata(cls(), cls._get_instances(path, context, site, language), path, site, language)
-
 
     # TODO: Move this function out of the way (subclasses will want to define their own attributes)
     def _get_instances(cls, path, context=None, site=None, language=None):
@@ -235,7 +231,7 @@ class MetadataBase(type):
             Each instance from each backend is looked up when possible/necessary.
             This is a generator to eliminate unnecessary queries.
         """
-        backend_context = {'view_context': context }
+        backend_context = {'view_context': context}
 
         for model in cls._meta.models.values():
             for instance in model.objects.get_instances(path, site, language, backend_context) or []:
@@ -255,12 +251,13 @@ def _get_metadata_model(name=None):
             return registry[name]
         except KeyError:
             if len(registry) == 1:
-                valid_names = u'Try using the name "%s" or simply leaving it out altogether.'% registry.keys()[0]
+                valid_names = u'Try using the name "%s" or simply leaving it out altogether.' % registry.keys()[0]
             else:
                 valid_names = u"Valid names are " + u", ".join(u'"%s"' % k for k in registry.keys())
             raise Exception(u"Metadata definition with name \"%s\" does not exist.\n%s" % (name, valid_names))
     else:
-        assert len(registry) == 1, "You must have exactly one Metadata class, if using get_metadata() without a 'name' parameter."
+        assert len(registry) == 1, "You must have exactly one Metadata class, " \
+                                   "if using get_metadata() without a 'name' parameter."
         return registry.values()[0]
 
 
@@ -321,8 +318,6 @@ def create_metadata_instance(metadata_class, instance):
                 return
             md._path = md._content_object.get_absolute_url()
             md.save()
-            # Move on, this metadata instance isn't for us
-            md = None
         else:
             # This is our instance!
             metadata = md
@@ -340,7 +335,7 @@ def populate_metadata(model, MetadataClass):
     """
     content_type = ContentType.objects.get_for_model(model)
     for instance in model.objects.all():
-        create_metadata_instance(MetadataClass, instance)
+        create_metadata_instance(MetadataClass, instance, content_type)
 
 
 def _update_callback(model_class, sender, instance, created, **kwargs):
@@ -356,7 +351,7 @@ def _update_callback(model_class, sender, instance, created, **kwargs):
     create_metadata_instance(model_class, instance)
 
 
-def _delete_callback(model_class, sender, instance,  **kwargs):
+def _delete_callback(model_class, sender, instance, **kwargs):
     content_type = ContentType.objects.get_for_model(instance)
     model_class.objects.filter(_content_type=content_type, _object_id=instance.pk).delete()
 
@@ -368,9 +363,7 @@ def register_signals():
             update_callback = curry(_update_callback, model_class=model_instance)
             delete_callback = curry(_delete_callback, model_class=model_instance)
 
-            ## Connect the models listed in settings to the update callback.
+            # Connect the models listed in settings to the update callback.
             for model in metadata_class._meta.seo_models:
                 models.signals.post_save.connect(update_callback, sender=model, weak=False)
                 models.signals.pre_delete.connect(delete_callback, sender=model, weak=False)
-
-
