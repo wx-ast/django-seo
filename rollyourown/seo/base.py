@@ -335,7 +335,7 @@ def populate_metadata(model, MetadataClass):
     """
     content_type = ContentType.objects.get_for_model(model)
     for instance in model.objects.all():
-        create_metadata_instance(MetadataClass, instance, content_type)
+        create_metadata_instance(MetadataClass, instance)
 
 
 def _update_callback(model_class, sender, instance, created, **kwargs):
