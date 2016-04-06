@@ -12,8 +12,10 @@ from django.contrib.contenttypes.models import ContentType
 
 class NotSet(object):
     " A singleton to identify unset values (where None would have meaning) "
-    def __str__(self): return "NotSet"
-    def __repr__(self): return self.__str__()
+    def __str__(self):
+        return "NotSet"
+    def __repr__(self):
+        return self.__str__()
 NotSet = NotSet()
 
 
@@ -40,6 +42,7 @@ class LazyList(list):
             # TODO: Test this functionality!
             self.populate = populate_function
         self._populated = False
+
     def _populate(self):
         """ Populate this list by calling populate(), but only once. """
         if not self._populated:
@@ -47,7 +50,7 @@ class LazyList(list):
             try:
                 self.populate()
                 self._populated = True
-            except Exception, e:
+            except Exception as e:
                 logging.debug("Currently unable to populate lazy list: %s" % e)
 
     # Accessing methods that require a populated field
@@ -113,13 +116,13 @@ def _resolver_resolve_to_name(resolver, path):
                     name = _pattern_resolve_to_name(pattern, new_path)
                 elif isinstance(pattern, RegexURLResolver):
                     name = _resolver_resolve_to_name(pattern, new_path)
-            except Resolver404, e:
+            except Resolver404 as e:
                 tried.extend([(pattern.regex.pattern + '   ' + t) for t in e.args[0]['tried']])
             else:
                 if name:
                     return name
                 tried.append(pattern.regex.pattern)
-        raise Resolver404, {'tried': tried, 'path': new_path}
+        raise Resolver404({'tried': tried, 'path': new_path})
 
 
 def resolve_to_name(path, urlconf=None):

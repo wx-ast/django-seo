@@ -17,12 +17,13 @@ def _syncdb_handler(app, created_models, verbosity, **kwargs):
                 if InstanceMetadata.objects.filter(_content_type=content_type):
                     continue
                 if verbosity > 0:
-                    print "Populating %s for %s.%s" % (Metadata._meta.verbose_name_plural, model._meta.app_label, model._meta.object_name)
+                        print("Populating %s for %s.%s" % (Metadata._meta.verbose_name_plural, model._meta.app_label, model._meta.object_name))
+
                 try:
                     # If a model is using SEO & it's schema is managed by South migrations rather than syncdb, this call will fail when doing an syncdb for the first time.
                     populate_metadata(model, InstanceMetadata)
                 except DatabaseError as err:
-                    print "Database Error (%s) when trying to populate %s for %s.%s. Ignoring (as assumed that this is a migration related issue)" % (str(err), Metadata._meta.verbose_name_plural, model._meta.app_label, model._meta.object_name)
+                    print("Database Error (%s) when trying to populate %s for %s.%s. Ignoring (as assumed that this is a migration related issue)" % (str(err), Metadata._meta.verbose_name_plural, model._meta.app_label, model._meta.object_name))
                     pass
 
 
