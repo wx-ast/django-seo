@@ -8,7 +8,10 @@ try:
 except ImportError:
     from django.contrib.contenttypes.generic import BaseGenericInlineFormSet, GenericStackedInline
 from django.contrib.contenttypes.models import ContentType
-from django.utils.encoding import smart_unicode
+try:
+    from django.utils.encoding import smart_unicode
+except ImportError:
+    from django.utils.encoding import smart_text as smart_unicode
 from django.forms.models import fields_for_model
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import capfirst
