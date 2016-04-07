@@ -18,6 +18,7 @@ from rollyourown.seo.utils import NotSet, Literal
 from rollyourown.seo.options import Options
 from rollyourown.seo.fields import MetadataField
 from rollyourown.seo.backends import backend_registry, RESERVED_FIELD_NAMES
+from django.utils import six
 
 registry = OrderedDict()
 
@@ -91,7 +92,10 @@ class FormattedMetadata(object):
                 return value or None
             value_list = []
             for f in self.__metadata._meta.groups[name]:
-                v = unicode(BoundMetadataField(self.__metadata._meta.elements[f], self._resolve_value(f)))
+                try:
+                    v = six.u(BoundMetadataField(self.__metadata._meta.elements[f], self._resolve_value(f)))
+                except NameError:
+                    v = str(BoundMetadataField(self.__metadata._meta.elements[f], self._resolve_value(f)))
                 value_list.append(v)
             value = '\n'.join(value_list).strip()
 
@@ -130,7 +134,7 @@ class FormattedMetadata(object):
             value = None
 
         if value is None:
-            value = u'\n'.join(unicode(getattr(self, f)) for f, e in self.__metadata._meta.elements.items() if e.head)
+            value = u'\n'.join(six.u(getattr(self, f)) for f, e in self.__metadata._meta.elements.items() if e.head)
             value = mark_safe(value)
             if self.__cache_prefix is not None:
                 cache.set(self.__cache_prefix, value or '')
@@ -182,7 +186,7 @@ class MetadataBase(type):
         # Collect and sort our elements
         elements = [(key, attrs.pop(key)) for key, obj in attrs.items()
                     if isinstance(obj, MetadataField)]
-        elements.sort(lambda x, y: cmp(x[1].creation_counter,
+        elements.sort(key=lambda x, y: (x[1].creation_counter,
                                        y[1].creation_counter))
         elements = OrderedDict(elements)
 

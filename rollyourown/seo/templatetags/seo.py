@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 from django import template
 from django.template import VariableDoesNotExist
 from django.utils import six
@@ -65,10 +64,7 @@ class MetadataNode(template.Node):
             context.dicts[0][self.variable_name] = metadata
             return ""
         else:
-            try:
-                return unicode(metadata)
-            except NameError:
-                return str(metadata)
+            return six.u(metadata)
 
 
 def do_get_metadata(parser, token):

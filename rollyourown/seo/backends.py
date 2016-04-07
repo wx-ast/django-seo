@@ -12,6 +12,7 @@ try:
 except ImportError:
     from django.contrib.contenttypes.generic import GenericForeignKey
 from django.template import Template, Context
+from django.utils import six
 
 from rollyourown.seo.utils import resolve_to_name, NotSet, Literal
 
@@ -298,7 +299,7 @@ class ModelBackend(MetadataBackend):
             objects = self.get_manager(options)()
 
             def __unicode__(self):
-                return unicode(self._content_type)
+                return six.u(self._content_type)
 
             def _process_context(self, context):
                 """ Use the given model instance as context for rendering
@@ -338,7 +339,7 @@ def _resolve(value, model_instance=None, context=None):
     """ Resolves any template references in the given value.
     """
 
-    if isinstance(value, basestring) and "{" in value:
+    if isinstance(value, six.string_types) and "{" in value:
         if context is None:
             context = Context()
         if model_instance is not None:
