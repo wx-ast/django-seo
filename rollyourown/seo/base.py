@@ -134,7 +134,18 @@ class FormattedMetadata(object):
             value = None
 
         if value is None:
-            value = u'\n'.join(six.u(getattr(self, f)) for f, e in self.__metadata._meta.elements.items() if e.head)
+            # workaround
+            # AttributeError: 'BoundMetadataField' object has no attribute 'replace'
+            # value = u'\n'.join(six.u(getattr(self, f)) for f, e in self.__metadata._meta.elements.items() if e.head)
+            value = []
+            for f, e in self.__metadata._meta.elements.items():
+                if e.head:
+                    attr = getattr(self, f)
+                    if type(attr) == BoundMetadataField:
+                        attr = str(attr)
+                    value.append(six.u(attr))
+            value = u'\n'.join(value)
+
             value = mark_safe(value)
             if self.__cache_prefix is not None:
                 cache.set(self.__cache_prefix, value or '')
@@ -186,8 +197,7 @@ class MetadataBase(type):
         # Collect and sort our elements
         elements = [(key, attrs.pop(key)) for key, obj in attrs.items()
                     if isinstance(obj, MetadataField)]
-        elements.sort(key=lambda x, y: (x[1].creation_counter,
-                                       y[1].creation_counter))
+        elements.sort(key=lambda x: x[1].creation_counter)
         elements = OrderedDict(elements)
 
         # Validation:
