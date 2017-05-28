@@ -141,9 +141,8 @@ class FormattedMetadata(object):
             for f, e in self.__metadata._meta.elements.items():
                 if e.head:
                     attr = getattr(self, f)
-                    if type(attr) == BoundMetadataField:
-                        attr = str(attr)
-                    value.append(six.u(attr))
+                    value.append(attr.__unicode__())
+
             value = u'\n'.join(value)
 
             value = mark_safe(value)
