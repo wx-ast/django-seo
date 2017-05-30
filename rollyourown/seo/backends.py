@@ -113,16 +113,19 @@ class BaseManager(models.Manager):
 #      There is no way to add future compulsory fields to all backends without editing each backend individually.
 #      This is probably going to have to be a limitataion we need to live with.
 
-class MetadataBackend(object):
+class MetadataBackendBase(type):
+
+    def __new__(cls, name, bases, attrs):
+        new_class = type.__new__(cls, name, bases, attrs)
+        backend_registry[new_class.name] = new_class
+        return new_class
+
+
+class MetadataBackend(six.with_metaclass(MetadataBackendBase)):
     name = None
     verbose_name = None
     unique_together = None
 
-    class __metaclass__(type):
-        def __new__(cls, name, bases, attrs):
-            new_class = type.__new__(cls, name, bases, attrs)
-            backend_registry[new_class.name] = new_class
-            return new_class
 
     def get_unique_together(self, options):
         ut = []

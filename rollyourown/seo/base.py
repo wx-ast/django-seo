@@ -141,7 +141,10 @@ class FormattedMetadata(object):
             for f, e in self.__metadata._meta.elements.items():
                 if e.head:
                     attr = getattr(self, f)
-                    value.append(attr.__unicode__())
+                    if six.PY3:
+                        value.append(attr)
+                    else:
+                        value.append(attr.__unicode__())
 
             value = u'\n'.join(value)
 
@@ -253,8 +256,8 @@ class MetadataBase(type):
                 yield instance
 
 
-class Metadata(object):
-    __metaclass__ = MetadataBase
+class Metadata(six.with_metaclass(MetadataBase)):
+    pass
 
 
 def _get_metadata_model(name=None):

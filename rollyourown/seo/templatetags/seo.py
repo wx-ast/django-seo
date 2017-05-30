@@ -64,8 +64,7 @@ class MetadataNode(template.Node):
             context.dicts[0][self.variable_name] = metadata
             return ""
         else:
-            # return six.u(metadata)
-            return metadata.__unicode__()
+            return six.u(metadata)
 
 
 def do_get_metadata(parser, token):
