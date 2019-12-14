@@ -13,7 +13,7 @@ It allows you to associate metadata with:
 Metadata can be edited in the admin in a centralised place, but also alongside any associated models.
 
 This is however a framework, not an app. You therefore have
-complete control over the data you store. 
+complete control over the data you store.
 Here is an example of a definition::
 
     from rollyourown import seo
@@ -25,7 +25,7 @@ Here is an example of a definition::
         heading        = seo.Tag(name="h1")
         subheading     = seo.Tag(name="h2")
         extra          = seo.Raw(head=True)
-    
+
         # Adding some fields for facebook (opengraph)
         og_title       = seo.MetaTag(name="og:title", populate_from="title", verbose_name="facebook title")
         og_description = seo.MetaTag(name="og:description", populate_from="description", verbose_name='facebook description')
@@ -33,3 +33,4 @@ Here is an example of a definition::
 As you can see it is very flexible, but there is much more than this simple example.
 
 The full documentation can be read online at http://django-seo.readthedocs.org/.
+.

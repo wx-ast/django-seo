@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-
 
 def get_seo_views(metadata_class):
     return get_view_names(metadata_class._meta.seo_views)

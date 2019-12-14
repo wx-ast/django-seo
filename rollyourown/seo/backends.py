@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-
 from collections import OrderedDict
 
 from django.utils.translation import ugettext_lazy as _
@@ -179,7 +178,7 @@ class PathBackend(MetadataBackend):
                 _language = models.CharField(_("language"), max_length=5, null=True, blank=True, db_index=True, choices=settings.LANGUAGES)
             objects = self.get_manager(options)()
 
-            def __unicode__(self):
+            def __str__(self):
                 return self._path
 
             def _populate_from_kwargs(self):
@@ -227,7 +226,7 @@ class ViewBackend(MetadataBackend):
                 except AttributeError:
                     return value
 
-            def __unicode__(self):
+            def __str__(self):
                 return self._view
 
             class Meta:
@@ -248,7 +247,7 @@ class ModelInstanceBackend(MetadataBackend):
     def get_model(self, options):
         class ModelInstanceMetadataBase(MetadataBaseModel):
             _path = models.CharField(_('path'), max_length=SEO_PATH_FIELD_MAX_LENGTH, editable=False, unique=not (options.use_sites or options.use_i18n))
-            _content_type = models.ForeignKey(ContentType, editable=False)
+            _content_type = models.ForeignKey(ContentType, editable=False, on_delete=models.CASCADE)
             _object_id = models.PositiveIntegerField(editable=False)
             _content_object = GenericForeignKey('_content_type', '_object_id')
             if options.use_sites:
@@ -257,7 +256,7 @@ class ModelInstanceBackend(MetadataBackend):
                 _language = models.CharField(_("language"), max_length=5, null=True, blank=True, db_index=True, choices=settings.LANGUAGES)
             objects = self.get_manager(options)()
 
-            def __unicode__(self):
+            def __str__(self):
                 return self._path
 
             class Meta:
@@ -294,14 +293,14 @@ class ModelBackend(MetadataBackend):
 
     def get_model(self, options):
         class ModelMetadataBase(MetadataBaseModel):
-            _content_type = models.ForeignKey(ContentType)
+            _content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
             if options.use_sites:
                 _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"))
             if options.use_i18n:
                 _language = models.CharField(_("language"), max_length=5, null=True, blank=True, db_index=True, choices=settings.LANGUAGES)
             objects = self.get_manager(options)()
 
-            def __unicode__(self):
+            def __str__(self):
                 return six.u(str(self._content_type))
 
             def _process_context(self, context):

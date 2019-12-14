@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django import forms
 from django.contrib import admin
 try:
@@ -18,6 +16,7 @@ from django.utils.text import capfirst
 
 from rollyourown.seo.utils import get_seo_content_types
 from rollyourown.seo.systemviews import get_seo_views
+
 
 # TODO Use groups as fieldsets
 
@@ -143,7 +142,7 @@ def get_model_form(metadata_class):
 
     # Get a list of fields, with _content_type at the start
     important_fields = ['_content_type'] + core_choice_fields(metadata_class)
-    _fields = important_fields + fields_for_model(model_class, exclude=important_fields).keys()
+    _fields = important_fields + list(fields_for_model(model_class, exclude=important_fields).keys())
 
     class ModelMetadataForm(forms.ModelForm):
         _content_type = forms.ChoiceField(label=capfirst(_("model")), choices=content_type_choices)
@@ -167,7 +166,7 @@ def get_path_form(metadata_class):
 
     # Get a list of fields, with _view at the start
     important_fields = ['_path'] + core_choice_fields(metadata_class)
-    _fields = important_fields + fields_for_model(model_class, exclude=important_fields).keys()
+    _fields = important_fields + list(fields_for_model(model_class, exclude=important_fields).keys())
 
     class ModelMetadataForm(forms.ModelForm):
         class Meta:
@@ -186,7 +185,7 @@ def get_view_form(metadata_class):
 
     # Get a list of fields, with _view at the start
     important_fields = ['_view'] + core_choice_fields(metadata_class)
-    _fields = important_fields + fields_for_model(model_class, exclude=important_fields).keys()
+    _fields = important_fields + list(fields_for_model(model_class, exclude=important_fields).keys())
 
     class ModelMetadataForm(forms.ModelForm):
         _view = forms.ChoiceField(label=capfirst(_("view")), choices=view_choices, required=False)

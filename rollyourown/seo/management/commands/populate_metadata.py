@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-
 
 from django.core.management.base import BaseCommand, CommandError
 from rollyourown.seo.management import populate_all_metadata

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 from django import template
 from django.template import VariableDoesNotExist
 from django.utils import six
@@ -7,6 +5,7 @@ from django.utils import six
 from rollyourown.seo.base import get_metadata, get_linked_metadata
 
 register = template.Library()
+
 
 class MetadataNode(template.Node):
     def __init__(self, metadata_name, variable_name, target, site, language):
@@ -20,8 +19,8 @@ class MetadataNode(template.Node):
         try:
             target = self.target.resolve(context)
         except VariableDoesNotExist:
-            msg = (u"{% get_metadata %} needs some path information.\n"
-                        u"Please use RequestContext with the django.core.context_processors.request context processor.\n"
+            msg = ("{% get_metadata %} needs some path information.\n"
+                        "Please use RequestContext with the django.core.context_processors.request context processor.\n"
                         "Or provide a path or object explicitly, eg {% get_metadata for path %} or {% get_metadata for object %}")
             raise template.TemplateSyntaxError(msg)
         else:
@@ -65,7 +64,7 @@ class MetadataNode(template.Node):
             return ""
         else:
             if six.PY3:
-                return metadata
+                return metadata.__str__()
             else:
                 return metadata.__unicode__()
 

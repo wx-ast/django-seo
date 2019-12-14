@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # TODO:
 #    * Move/rename namespace polluting attributes
 #    * Documentation
@@ -34,7 +32,7 @@ class FormattedMetadata(object):
             if metadata._meta.use_sites and site:
                 hexpath = hashlib.md5(iri_to_uri(site.domain + path)).hexdigest()
             else:
-                hexpath = hashlib.md5(iri_to_uri(path)).hexdigest()
+                hexpath = hashlib.md5(iri_to_uri(path).encode('utf-8')).hexdigest()
             if metadata._meta.use_i18n:
                 self.__cache_prefix = 'rollyourown.seo.%s.%s.%s' % \
                                       (self.__metadata.__class__.__name__, hexpath, language)
@@ -126,7 +124,7 @@ class FormattedMetadata(object):
 
         return value or None
 
-    def __unicode__(self):
+    def __str__(self):
         """ String version of this object is the html output of head elements. """
         if self.__cache_prefix is not None:
             value = cache.get(self.__cache_prefix)
@@ -136,17 +134,17 @@ class FormattedMetadata(object):
         if value is None:
             # workaround
             # AttributeError: 'BoundMetadataField' object has no attribute 'replace'
-            # value = u'\n'.join(six.u(getattr(self, f)) for f, e in self.__metadata._meta.elements.items() if e.head)
+            # value = '\n'.join(six.u(getattr(self, f)) for f, e in self.__metadata._meta.elements.items() if e.head)
             value = []
             for f, e in self.__metadata._meta.elements.items():
                 if e.head:
                     attr = getattr(self, f)
                     if six.PY3:
-                        value.append(attr)
+                        value.append(attr.__str__())
                     else:
                         value.append(attr.__unicode__())
 
-            value = u'\n'.join(value)
+            value = '\n'.join(value)
 
             value = mark_safe(value)
             if self.__cache_prefix is not None:
@@ -165,14 +163,11 @@ class BoundMetadataField(object):
         else:
             self.value = None
 
-    def __unicode__(self):
+    def __str__(self):
         if self.value:
             return mark_safe(self.field.render(self.value))
         else:
-            return u""
-
-    def __str__(self):
-        return self.__unicode__().encode("ascii", "ignore")
+            return ''
 
 
 class MetadataBase(type):
@@ -197,8 +192,19 @@ class MetadataBase(type):
         options = Options(Meta, help_text)
 
         # Collect and sort our elements
-        elements = [(key, attrs.pop(key)) for key, obj in attrs.items()
-                    if isinstance(obj, MetadataField)]
+        elements = []
+        attrs_tmp = {}
+        for key, obj in attrs.items():
+            if isinstance(obj, MetadataField):
+                elements.append((key, obj))
+            else:
+                attrs_tmp[key] = obj
+
+        attrs = attrs_tmp
+
+        # elements = [(key, attrs.pop(key)) for key, obj in attrs.items()
+        #             if isinstance(obj, MetadataField)]
+
         elements.sort(key=lambda x: x[1].creation_counter)
         elements = OrderedDict(elements)
 
@@ -267,14 +273,14 @@ def _get_metadata_model(name=None):
             return registry[name]
         except KeyError:
             if len(registry) == 1:
-                valid_names = u'Try using the name "%s" or simply leaving it out altogether.' % registry.keys()[0]
+                valid_names = 'Try using the name "%s" or simply leaving it out altogether.' % registry.keys()[0]
             else:
-                valid_names = u"Valid names are " + u", ".join(u'"%s"' % k for k in registry.keys())
-            raise Exception(u"Metadata definition with name \"%s\" does not exist.\n%s" % (name, valid_names))
+                valid_names = "Valid names are " + ", ".join('"%s"' % k for k in registry.keys())
+            raise Exception("Metadata definition with name \"%s\" does not exist.\n%s" % (name, valid_names))
     else:
         assert len(registry) == 1, "You must have exactly one Metadata class, " \
                                    "if using get_metadata() without a 'name' parameter."
-        return registry.values()[0]
+        return list(registry.values())[0]
 
 
 def get_metadata(path, name=None, context=None, site=None, language=None):

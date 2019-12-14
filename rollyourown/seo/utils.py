@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import re
 
@@ -9,6 +7,7 @@ from django.utils.functional import lazy
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape
 from django.contrib.contenttypes.models import ContentType
+
 
 class NotSet(object):
     " A singleton to identify unset values (where None would have meaning) "
@@ -79,7 +78,7 @@ class LazyChoices(LazyList):
         populated after the models have been defined (ie on validation).
     """
 
-    def __nonzero__(self):
+    def __bool__(self):
         # Django tests for existence too early, meaning population is attempted
         # before the models have been imported.
         # This may have some side effects if truth testing is supposed to
@@ -91,10 +90,11 @@ class LazyChoices(LazyList):
             return bool(len(self))
 
 
-from django.core.urlresolvers import RegexURLResolver, RegexURLPattern, Resolver404, get_resolver
+from django.urls import URLResolver, Resolver404, get_resolver
+from django.urls.resolvers import URLPattern
 
 def _pattern_resolve_to_name(pattern, path):
-    match = pattern.regex.search(path)
+    match = get_regex(pattern).search(path)
     if match:
         name = ""
         if pattern.name:
@@ -102,26 +102,34 @@ def _pattern_resolve_to_name(pattern, path):
         elif hasattr(pattern, '_callback_str'):
             name = pattern._callback_str
         else:
-            name = "%s.%s" % (pattern.callback.__module__, pattern.callback.func_name)
+            name = "%s.%s" % (pattern.callback.__module__, pattern.callback.__name__)
         return name
+
+def get_regex(resolver_or_pattern):
+     """Utility method for django's deprecated resolver.regex"""
+     try:
+         regex = resolver_or_pattern.regex
+     except AttributeError:
+         regex = resolver_or_pattern.pattern.regex
+     return regex
 
 def _resolver_resolve_to_name(resolver, path):
     tried = []
-    match = resolver.regex.search(path)
+    match = get_regex(resolver).search(path)
     if match:
         new_path = path[match.end():]
         for pattern in resolver.url_patterns:
             try:
-                if isinstance(pattern, RegexURLPattern):
-                    name = _pattern_resolve_to_name(pattern, new_path)
-                elif isinstance(pattern, RegexURLResolver):
+                if isinstance(pattern, URLResolver):
                     name = _resolver_resolve_to_name(pattern, new_path)
+                elif isinstance(pattern, URLPattern):
+                    name = _pattern_resolve_to_name(pattern, new_path)
             except Resolver404 as e:
-                tried.extend([(pattern.regex.pattern + '   ' + t) for t in e.args[0]['tried']])
+                tried.extend([(get_regex(pattern).pattern + '   ' + t) for t in e.args[0]['tried']])
             else:
                 if name:
                     return name
-                tried.append(pattern.regex.pattern)
+                tried.append(get_regex(pattern).pattern)
         raise Resolver404({'tried': tried, 'path': new_path})
 
 
@@ -134,7 +142,7 @@ def resolve_to_name(path, urlconf=None):
 
 def _replace_quot(match):
     unescape = lambda v: v.replace('&quot;', '"').replace('&amp;', '&')
-    return u'<%s%s>' % (unescape(match.group(1)), unescape(match.group(3)))
+    return '<%s%s>' % (unescape(match.group(1)), unescape(match.group(3)))
 
 
 def escape_tags(value, valid_tags):
@@ -157,7 +165,7 @@ def escape_tags(value, valid_tags):
     # 2. Reenable certain tags
     if valid_tags:
         # TODO: precompile somewhere once?
-        tag_re = re.compile(r'&lt;(\s*/?\s*(%s))(.*?\s*)&gt;' % u'|'.join(re.escape(tag) for tag in valid_tags))
+        tag_re = re.compile(r'&lt;(\s*/?\s*(%s))(.*?\s*)&gt;' % '|'.join(re.escape(tag) for tag in valid_tags))
         value = tag_re.sub(_replace_quot, value)
 
     # Allow comments to be hidden

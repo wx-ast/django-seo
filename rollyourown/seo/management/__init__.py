@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import print_function
-
 from django.db.models import signals
 from django.db.utils import DatabaseError
 from django.contrib.contenttypes.models import ContentType
+
 from rollyourown.seo.base import registry, populate_metadata
 from rollyourown.seo import models as seo_models
 
