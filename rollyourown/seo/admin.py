@@ -237,6 +237,7 @@ def auto_register_inlines(admin_site, metadata_class):
     """ This is a questionable function that automatically adds our metadata
         inline to all relevant models in the site.
     """
+
     inline_class = get_inline(metadata_class)
 
     for model, admin_class_instance in admin_site._registry.items():

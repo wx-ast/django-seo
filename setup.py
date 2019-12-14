@@ -1,38 +1,40 @@
-#!/usr/bin/env python2.5
-# -*- coding: UTF-8 -*-
+import os
 
-try:
-    import ez_setup
-    ez_setup.use_setuptools()
-except ImportError:
-    pass
+from setuptools import find_packages, setup
 
-from setuptools import setup, find_packages
 
 setup(
-    name = "DjangoSEO",
-    version = '1.0.1',
-    packages = find_packages(exclude=["docs*", "regressiontests*"]),
-    namespace_packages = ['rollyourown'],
-    requires = ['django (>=1.1)'],
-    author = "Will Hardy",
-    author_email = "djangoseo@willhardy.com.au",
-    description = "A framework for managing SEO metadata in Django.",
-    long_description = open('README').read(),
-    license = "LICENSE",
-    keywords = "seo, django, framework",
-    url = "https://github.com/willhardy/django-seo",
+    name = 'django-seo',
+    zip_safe = False,  # eggs are the devil.
+    version = '1.0.2',
+    description = 'A framework for managing SEO metadata in Django.',
+    long_description = open(os.path.join(os.path.dirname(__file__), 'README')).read(),
+    author = 'Will Hardy',
+    author_email = 'djangoseo@willhardy.com.au',
+    url = 'https://github.com/wx-ast/django-seo',
     include_package_data = True,
+    packages = find_packages(exclude=['docs*', 'regressiontests*']),
+
+    namespace_packages = ['rollyourown'],
+    requires = ['django (>=2.2)'],
+    license = 'LICENSE',
+    keywords = 'seo, django, framework',
     classifiers=[
-        "Development Status :: 4 - Beta",
-        "Environment :: Web Environment",
-        "Framework :: Django",
-        "Intended Audience :: Developers",
-        "Programming Language :: Python",
-        "License :: OSI Approved :: Apache Software License",
-        "License :: OSI Approved :: BSD License",
-        "Operating System :: OS Independent",
-        "Topic :: Software Development"
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Framework :: Django',
+        'Framework :: Django :: 2.2',
+        'Intended Audience :: Developers',
+        'Programming Language :: Python',
+        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Topic :: Software Development',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
+    python_requires='>=3.6',
 )
 

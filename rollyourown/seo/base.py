@@ -262,8 +262,8 @@ class MetadataBase(type):
                 yield instance
 
 
-class Metadata(six.with_metaclass(MetadataBase)):
-    pass
+# class Metadata(six.with_metaclass(MetadataBase)):
+#     pass
 
 
 def _get_metadata_model(name=None):

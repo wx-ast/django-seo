@@ -1,4 +1,4 @@
-VERSION = (1, 0, 0, 'beta', 1)
+VERSION = (1, 0, 2, 'beta', 1)
 __authors__ = ["Will Hardy <django-seo@willhardy.com.au>"]
 
 

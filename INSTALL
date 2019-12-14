@@ -11,5 +11,5 @@ Or download the release manually, unpack and run:
 
 If you are interested in the development version, you can download it here:
 
-    git clone git@github.com:willhardy/django-seo.git
+    git clone git@github.com:wx-ast/django-seo.git
 
