@@ -173,7 +173,7 @@ class PathBackend(MetadataBackend):
         class PathMetadataBase(MetadataBaseModel):
             _path = models.CharField(_('path'), max_length=SEO_PATH_FIELD_MAX_LENGTH, unique=not (options.use_sites or options.use_i18n))
             if options.use_sites:
-                _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"))
+                _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"), on_delete=models.CASCADE)
             if options.use_i18n:
                 _language = models.CharField(_("language"), max_length=5, null=True, blank=True, db_index=True, choices=settings.LANGUAGES)
             objects = self.get_manager(options)()
@@ -206,7 +206,7 @@ class ViewBackend(MetadataBackend):
         class ViewMetadataBase(MetadataBaseModel):
             _view = models.CharField(_('view'), max_length=255, unique=not (options.use_sites or options.use_i18n), default="", blank=True)
             if options.use_sites:
-                _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"))
+                _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"), on_delete=models.CASCADE)
             if options.use_i18n:
                 _language = models.CharField(_("language"), max_length=5, null=True, blank=True, db_index=True, choices=settings.LANGUAGES)
             objects = self.get_manager(options)()
@@ -251,7 +251,7 @@ class ModelInstanceBackend(MetadataBackend):
             _object_id = models.PositiveIntegerField(editable=False)
             _content_object = GenericForeignKey('_content_type', '_object_id')
             if options.use_sites:
-                _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"))
+                _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"), on_delete=models.CASCADE)
             if options.use_i18n:
                 _language = models.CharField(_("language"), max_length=5, null=True, blank=True, db_index=True, choices=settings.LANGUAGES)
             objects = self.get_manager(options)()
@@ -295,7 +295,7 @@ class ModelBackend(MetadataBackend):
         class ModelMetadataBase(MetadataBaseModel):
             _content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
             if options.use_sites:
-                _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"))
+                _site = models.ForeignKey(Site, null=True, blank=True, verbose_name=_("site"), on_delete=models.CASCADE)
             if options.use_i18n:
                 _language = models.CharField(_("language"), max_length=5, null=True, blank=True, db_index=True, choices=settings.LANGUAGES)
             objects = self.get_manager(options)()
